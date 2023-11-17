@@ -38,6 +38,7 @@ df.drop(df[df['fare_amount'] < 0].index, inplace = True)
 # Co-relation Heatmap
 import seaborn as sns
 sns.heatmap(df.corr(), annot = True)
+#
 x = df.drop("fare_amount", axis = 1) # Independent Set
 y = df['fare_amount'] # Target Variable
 # Important before we fit the model
@@ -51,7 +52,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, rando
 from sklearn.linear_model import LinearRegression
 lrmodel = LinearRegression()
 lrmodel.fit(x_train, y_train) # Fit the Model
+#
 LinearRegression()
+#
 predict = lrmodel.predict(x_test)
 # Analyze the Metric Scores
 from sklearn import metrics
@@ -66,7 +69,9 @@ from sklearn.ensemble import RandomForestRegressor
 rfmodel = RandomForestRegressor(n_estimators=100,random_state=101)
 # Fit the Model
 rfmodel.fit(x_train,y_train)
+#
 RandomForestRegressor(random_state=101)
+#
 rfpredict = rfmodel.predict(x_test)
 # Analyze th Metric Scores
 from sklearn import metrics
