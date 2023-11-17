@@ -1,0 +1,43 @@
+import pandas as pd
+# Read the Dataset with a different encoding
+dataframe = pd.read_csv("sales_data_sample.csv", encoding='latin-1')
+# Create a Copy of the Dataset, we will work on this Copy
+df = dataframe
+df.info()
+# Drop the Unnecessary Columns
+df = df[['ORDERLINENUMBER', 'SALES']]
+df.info()
+df.isna().sum()
+# Standard Preprocessing
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaled_values = scaler.fit_transform(df.values)
+
+# This tries to make the Mean 0 and the Standard Deviation as 1
+# Import KMeansClustering
+
+from sklearn.cluster import KMeans
+# Finding k with the Elbow Method
+
+# Within Cluster Sum of Squares of Distances
+wcss = [] 
+
+for i in range(1,11):
+    model = KMeans(n_clusters=i)
+    model.fit_predict(scaled_values)
+    wcss.append(model.inertia_)
+
+# The inertia is computed as the sum of squared distances from each data point to the c
+# Plot the Elbow Plot
+import matplotlib.pyplot as plt
+
+plt.plot(range(1,11),wcss,'ro-')
+plt.show()
+kmeans_model = KMeans(n_clusters=7)
+cluster = kmeans_model.fit_predict(scaled_values)
+import warnings
+warnings.filterwarnings('ignore')
+df['Cluster'] = cluster
+df
+plt.scatter(df['ORDERLINENUMBER'], df['SALES'],c=df['Cluster'])
