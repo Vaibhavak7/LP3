@@ -1,0 +1,77 @@
+import pandas as pd
+# Read the Dataset
+dataframe = pd.read_csv("uber.csv")
+# Create a Copy of the Dataset, we will work on the Copy and not tamper Actual Dataset
+df = dataframe
+df.head()
+df.info()
+# Since we have only 1 row with missing values, we can drop it directly
+df.dropna(inplace = True)
+df.isna().sum()
+df.drop(["Unnamed: 0", "key"], axis = 1, inplace = True)
+df.describe()
+# Convert pickup_datetime column to its proper datatype
+df["pickup_datetime"] = pd.to_datetime(df["pickup_datetime"])
+df.info()
+# Visualize the Outliers for fare_amount
+import matplotlib.pyplot as plt
+plt.boxplot(df["fare_amount"])
+# Function to find the Outliers
+def find_outliers(df):
+    q1 = df.quantile(0.25) # 1st Quartile
+    q3 = df.quantile(0.75) # 3d Quartile
+    IQR = q3-q1 # InterQuartile Range
+    outliers = df[(df<q1-1.5*IQR) | (df>q3+1.5*IQR)]
+    return outliers
+# Outlier Insights
+fare_amount_outliers = find_outliers(df["fare_amount"])
+print("Number of Outlier : " + str(len(fare_amount_outliers)))
+print("Max Outlier : " + str(fare_amount_outliers.max()))
+print("Min Outlier : " + str(fare_amount_outliers.min()))
+# Drop the Outliers
+q_low = df["fare_amount"].quantile(0.25)
+q_hi  = df["fare_amount"].quantile(0.75)
+iqr = q_hi - q_low
+df = df[(df["fare_amount"] < q_hi+1.5*iqr) & (df["fare_amount"] > q_low-1.5*iqr)]
+# Drop Rows having fare_amount as negative
+df.drop(df[df['fare_amount'] < 0].index, inplace = True)
+# Co-relation Heatmap
+import seaborn as sns
+sns.heatmap(df.corr(), annot = True)
+x = df.drop("fare_amount", axis = 1) # Independent Set
+y = df['fare_amount'] # Target Variable
+# Important before we fit the model
+x['pickup_datetime'] = pd.to_numeric(pd.to_datetime(x['pickup_datetime']))
+from sklearn.model_selection import train_test_split
+# Split the Dataset into Testing and Training Parts
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 1)
+# Random State is fixed because the nature of splitting the Data into testing and training parts is random,
+# Random State helps us reproduce the same results each time
+# Linear Regression
+from sklearn.linear_model import LinearRegression
+lrmodel = LinearRegression()
+lrmodel.fit(x_train, y_train) # Fit the Model
+LinearRegression()
+predict = lrmodel.predict(x_test)
+# Analyze the Metric Scores
+from sklearn import metrics
+import numpy as np
+print(f"Mean absolute error {metrics.mean_absolute_error(y_test, predict)}")
+print(f"Mean squared error {metrics.mean_squared_error(y_test, predict)}")
+print(f"Root mean squared error {np.sqrt(metrics.mean_squared_error(y_test, predict))}")
+# print(metrics.r2_score(y_test,predict))
+# Random Forest Regression
+from sklearn.ensemble import RandomForestRegressor
+# n_estimators = Number of Decision Trees
+rfmodel = RandomForestRegressor(n_estimators=100,random_state=101)
+# Fit the Model
+rfmodel.fit(x_train,y_train)
+RandomForestRegressor(random_state=101)
+rfpredict = rfmodel.predict(x_test)
+# Analyze th Metric Scores
+from sklearn import metrics
+import numpy as np
+print(f"Mean absolute error {metrics.mean_absolute_error(y_test, rfpredict)}")
+print(f"Mean squared error {metrics.mean_squared_error(y_test, rfpredict)}")
+print(f"Root mean squared error {np.sqrt(metrics.mean_squared_error(y_test, rfpredict))}")
+# print(metrics.r2_score(y_test,predict))
