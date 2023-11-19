@@ -1,0 +1,82 @@
+Huffman
+
+#include <bits/stdc++.h>
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    int data;
+    string x;
+    Node *left;
+    Node *right;
+    Node(int d)
+    {
+        data = d;
+        x = "";
+        left = NULL;
+        right = NULL;
+    }
+};
+struct cmp
+{
+    bool operator()(Node *l, Node *r)
+    {
+        return l->data > r->data;
+    }
+};
+void preorder(Node *root, string s)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+    if (root->left == NULL && root->right == NULL)
+    {
+        cout << root->x << ":" << s << endl;
+        return;
+    }
+    preorder(root->left, s + "0");
+    preorder(root->right, s + "1");
+}
+int main()
+{
+    string s;
+    cout << "Enter the string: ";
+    cin >> s;
+    int n = s.length();
+    vector<int> freq(n, 0);
+    cout << "Enter the Freq of Each char: ";
+    for (int i = 0; i < n; i++)
+    {
+        cin >> freq[i];
+    }
+    cout << "Huffman Code:--" << endl;
+    priority_queue<Node *, vector<Node *>, cmp> mh;
+    for (int i = 0; i < s.length(); i++)
+    {
+        Node *temp = new Node(freq[i]);
+        temp->x = (s[i]);
+        mh.push(temp);
+    }
+
+    while (mh.size() != 1)
+    {
+        Node *left = mh.top();
+        mh.pop();
+        Node *right = mh.top();
+        mh.pop();
+        Node *parent = new Node(left->data + right->data);
+        parent->left = left;
+        parent->right = right;
+        mh.push(parent);
+    }
+    Node *root = mh.top();
+    string st = "";
+    mh.pop();
+    preorder(root, st);
+    return 0;
+}
+
+//abcdef
+//4 5 12 13 16 45
